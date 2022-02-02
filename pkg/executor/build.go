@@ -293,9 +293,11 @@ func (s *stageBuilder) build() error {
 	}
 
 	// Apply optimizations to the instructions.
+	var buildArgs = s.args.Clone()
 	if err := s.optimize(*compositeKey, s.cf.Config); err != nil {
 		return errors.Wrap(err, "failed to optimize instructions")
 	}
+	s.args = buildArgs
 
 	// Unpack file system to root if we need to.
 	shouldUnpack := false
