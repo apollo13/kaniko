@@ -242,6 +242,13 @@ func (s *stageBuilder) optimize(compositeKey CompositeCache, cfg v1.Config) erro
 			return errors.Wrap(err, "failed to get files used from context")
 		}
 
+		// Mutate the config for any commands that require it.
+		if command.MetadataOnly() {
+			if err := command.ExecuteCommand(&cfg, s.args); err != nil {
+				return err
+			}
+		}
+
 		compositeKey, err = s.populateCompositeKey(command, files, compositeKey, s.args, cfg.Env)
 		if err != nil {
 			return err
@@ -270,13 +277,6 @@ func (s *stageBuilder) optimize(compositeKey CompositeCache, cfg v1.Config) erro
 			if cacheCmd := command.CacheCommand(img); cacheCmd != nil {
 				logrus.Infof("Using caching version of cmd: %s", command.String())
 				s.cmds[i] = cacheCmd
-			}
-		}
-
-		// Mutate the config for any commands that require it.
-		if command.MetadataOnly() {
-			if err := command.ExecuteCommand(&cfg, s.args); err != nil {
-				return err
 			}
 		}
 	}
